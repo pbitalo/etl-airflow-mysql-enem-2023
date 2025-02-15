@@ -64,16 +64,16 @@ O workflow implementa um processo de **ETL (Extract, Transform, Load)** para col
 
 O fluxo de ETL está dividido em **4 DAGs principais**, que são executadas sequencialmente:
 
-1. **`etl_enem_2023_p1_extracao`**  
+1. **`etl_enem_2023_p1_baixar_descompactar`**  
    - Baixa os dados brutos do ENEM 2023 do site do INEP.
    - Armazena o arquivo `.csv` na pasta de staging dentro do ambiente do Airflow.
 
-2. **`etl_enem_2023_p2_limpeza`**  
+2. **`etl_enem_2023_p2_criar_schema_dw_mysql`**  
    - Processa e limpa os dados brutos.
    - Remove colunas desnecessárias e trata valores nulos.
    - Gera um novo `.csv` limpo e preparado para transformação.
 
-3. **`etl_enem_2023_p3_transformacao`**  
+3. **`etl_enem_2023_p3_pre_processamento_dados_dw_mysql`**  
    - Aplica regras de transformação.
    - Calcula estatísticas e novas colunas úteis.
    - Gera o arquivo final pronto para carga no DW.
@@ -82,16 +82,19 @@ O fluxo de ETL está dividido em **4 DAGs principais**, que são executadas sequ
    - Lê os dados processados e insere no MySQL.
    - Popula as tabelas dimensionais e a tabela fato com as notas dos candidatos.
    - Utiliza processamento em **chunks** para otimizar a inserção.
+     
+5. **`etl_enem_2023_p5_consultando_dw`**  
+   - Realiza consultas para responder a perguntas alvo afim de testar a o dw recem gerado.
+
 
 ### 🔁 Fluxo entre as DAGs
 
 ```mermaid
 graph TD;
-    A[etl_enem_2023_p1_extracao] --> B[etl_enem_2023_p2_limpeza];
-    B --> C[etl_enem_2023_p3_transformacao];
+    A[etl_enem_2023_p1_baixar_descompactar] --> B[etl_enem_2023_p2_criar_schema_dw_mysql];
+    B --> C[etl_enem_2023_p3_pre_processamento_dados_dw_mysql];
     C --> D[etl_enem_2023_p4_inserindo_dados_dw_mysql];
     D --> E[etl_enem_2023_p5_consultando_dw];
-    E --> F[etl_enem_2023_p6_visualizacao_dashboard];
 ```
 
 Cada DAG depende da execução bem-sucedida da anterior, garantindo que os dados sejam processados corretamente antes de avançar para a próxima etapa.
