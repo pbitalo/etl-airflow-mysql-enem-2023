@@ -18,9 +18,9 @@ O workflow implementa um processo de **ETL (Extract, Transform, Load)** para col
 
 ### Tabelas Dimensão
 
-📂 **Dimensão	dim_estado**	**id_estado** (PK), **SG_UF_PROVA**
+📂 Dimensão	**dim_estado**	**id_estado** (PK), **SG_UF_PROVA**
 
-📂 **Dimensão	dim_candidato**	**id_candidato** (PK), **TP_FAIXA_ETARIA**, **TP_SEXO**
+📂 Dimensão	**dim_candidato**	**id_candidato** (PK), **TP_FAIXA_ETARIA**, **TP_SEXO**
 
 ### Tabela Fato
 
