@@ -7,8 +7,11 @@ Esse projeto visa realizar um processo completo de engenharia de dados, porém, 
 
 ### Perguntas alvo.
 1. - **Qual a porcentagem de pessoas do sexo masculino e feminino realizaram o enem em 2023 por estado ?**
+
 2. - **Quais foram as médias alcançadas pelos participantes do ENEM por disciplina  (como Matemática, Ciências da Natureza, Linguagens e Códigos, Redação, etc.) por estado ?**
+     
 2.1. **Qual o estado com média geral mais baixa e mais alta ?**
+
 3. - **Qual o total de candidatos contabilizados ?" Quais são as tabelas fato e dimensão que devemos ter para responder essas questões ?**
 
 ## 📌 Visão Geral do workflow
