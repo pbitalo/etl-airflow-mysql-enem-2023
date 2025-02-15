@@ -26,7 +26,7 @@ O workflow implementa um processo de **ETL (Extract, Transform, Load)** para col
 
 📊 Fato	 **fato_notas**	**id_estado** (FK), **id_candidato** (FK), **NU_NOTA_MT**, **NU_NOTA_CN**, **NU_NOTA_LC**, **NU_NOTA_CH**, **NU_NOTA_REDACAO**
 
-## 🔄 Modelo relacional
+## 🏗️ Modelo relacional
                 +------------------+
                 |   dim_estado     |
                 |------------------|
@@ -83,7 +83,7 @@ O fluxo de ETL está dividido em **4 DAGs principais**, que são executadas sequ
    - Popula as tabelas dimensionais e a tabela fato com as notas dos candidatos.
    - Utiliza processamento em **chunks** para otimizar a inserção.
 
-### 🔄 Fluxo entre as DAGs
+### 🔀 Fluxo entre as DAGs
 
 ```mermaid
 graph TD;
