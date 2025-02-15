@@ -89,7 +89,7 @@ O fluxo de ETL está dividido em **4 DAGs principais**, que são executadas sequ
 graph TD;
     A[etl_enem_2023_p1_extracao] --> B[etl_enem_2023_p2_limpeza];
     B --> C[etl_enem_2023_p3_transformacao];
-    C --> D[etl_enem_2023_p4_inserindo_dados_dw_mysql];
+    C --> D[etl_enem_2023_p4_inserindo_dados_dw_mysql] D --> E[etl_enem_2023_p5_consultando_dw];
 ```
 
 Cada DAG depende da execução bem-sucedida da anterior, garantindo que os dados sejam processados corretamente antes de avançar para a próxima etapa.
