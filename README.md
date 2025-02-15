@@ -20,14 +20,15 @@ O workflow implementa um processo de **ETL (Extract, Transform, Load)** para col
 
 Tipo	Nome da Tabela	Campos Principais
 
-📂 **Dimensão	dim_estado**	id_estado (PK), SG_UF_PROVA
-📂 **Dimensão	dim_candidato**	id_candidato (PK), TP_FAIXA_ETARIA, TP_SEXO
+📂 **Dimensão	dim_estado**	**id_estado** (PK), **SG_UF_PROVA**
+
+📂 **Dimensão	dim_candidato**	**id_candidato** (PK), **TP_FAIXA_ETARIA**, **TP_SEXO**
 
 ### Tabela Fato
 
-Tipo	Nome da Tabela	Campos Principais
+Tipo  Nome da Tabela	Campos Principais
 
-📊 Fato	**fato_notas**	id_estado (FK), id_candidato (FK), NU_NOTA_MT, NU_NOTA_CN, NU_NOTA_LC, NU_NOTA_CH, NU_NOTA_REDACAO
+📊 Fato	 **fato_notas**	**id_estado** (FK), **id_candidato** (FK), **NU_NOTA_MT**, **NU_NOTA_CN**, **NU_NOTA_LC**, **NU_NOTA_CH**, **NU_NOTA_REDACAO**
 
 ## 🔄 Modelo relacional
                 +------------------+
