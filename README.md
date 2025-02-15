@@ -60,7 +60,7 @@ O workflow implementa um processo de **ETL (Extract, Transform, Load)** para col
                 | TP_SEXO          |
                 +------------------+
 
-## 📊 Fluxo de Trabalho
+## 🔀 Fluxo de Trabalho
 
 O fluxo de ETL está dividido em **4 DAGs principais**, que são executadas sequencialmente:
 
@@ -83,7 +83,7 @@ O fluxo de ETL está dividido em **4 DAGs principais**, que são executadas sequ
    - Popula as tabelas dimensionais e a tabela fato com as notas dos candidatos.
    - Utiliza processamento em **chunks** para otimizar a inserção.
 
-### 🔀 Fluxo entre as DAGs
+### 🔁 Fluxo entre as DAGs
 
 ```mermaid
 graph TD;
