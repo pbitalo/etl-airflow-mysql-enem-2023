@@ -15,13 +15,18 @@ Esse projeto visa realizar um processo completo de engenharia de dados, porém, 
 O workflow implementa um processo de **ETL (Extract, Transform, Load)** para coletar, limpar e carregar os dados do ENEM 2023 em um banco de dados MySQL. O **Airflow** gerencia a orquestração das tarefas, garantindo que as fases do pipeline sejam executadas na ordem correta.
 
 ## 📌 Modelo do Data Warehouse
+
 ### Tabelas Dimensão
+
 Tipo	Nome da Tabela	Campos Principais
+
 📂 **Dimensão	dim_estado**	id_estado (PK), SG_UF_PROVA
 📂 **Dimensão	dim_candidato**	id_candidato (PK), TP_FAIXA_ETARIA, TP_SEXO
 
 ### Tabela Fato
+
 Tipo	Nome da Tabela	Campos Principais
+
 📊 Fato	**fato_notas**	id_estado (FK), id_candidato (FK), NU_NOTA_MT, NU_NOTA_CN, NU_NOTA_LC, NU_NOTA_CH, NU_NOTA_REDACAO
 
 ## 🔄 Modelo relacional
@@ -59,6 +64,7 @@ Tipo	Nome da Tabela	Campos Principais
                 +------------------+
 
 ## 📊 Fluxo de Trabalho
+
 O fluxo de ETL está dividido em **4 DAGs principais**, que são executadas sequencialmente:
 
 1. **`etl_enem_2023_p1_extracao`**  
