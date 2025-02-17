@@ -279,4 +279,4 @@ Levando com conta que o docker está instalado/configurado, siga os passos:
 
 ## 🔥 Workflow
 
-![Dashboard](https://github.com/pbitalo/etl-airflow-mysql-enem-2023/blob/main/dashboard/workflow.png)
+![Workflow](https://github.com/pbitalo/etl-airflow-mysql-enem-2023/blob/main/dashboard/Workflow.png)
