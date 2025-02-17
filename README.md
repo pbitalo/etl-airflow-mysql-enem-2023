@@ -272,3 +272,7 @@ Levando com conta que o docker está instalado/configurado, siga os passos:
 | `url_enem_2023`     | https://download.inep.gov.br/microdados/microdados_enem_2023.zip |
 
 4. **`Execute a DAG workflow-dw-enem-2023`**
+
+## 🔥 Dashboard gerado via PowerBi
+
+![Dashboard](https://github.com/pbitalo/etl-airflow-mysql-enem-2023/blob/main/dashboard/imagem_dashboard.png)
