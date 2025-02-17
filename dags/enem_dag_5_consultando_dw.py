@@ -7,7 +7,7 @@ import MySQLdb
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'start_date': datetime(2025, 2, 10),
+    'start_date': datetime.now(),
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
 }
@@ -31,23 +31,13 @@ def consultar_dw_mysql(sql_query, task_name):
     conn.close()
     print(f"✅ {task_name} concluído!")
 
-query_faixa_etaria = """
-    SELECT 
-        c.TP_FAIXA_ETARIA,
-        COUNT(*) AS total_candidatos,
-        ROUND((COUNT(*) * 100.0 / SUM(COUNT(*)) OVER ()), 2) AS percentual
-    FROM fato_notas f
-    JOIN dim_candidato c ON f.id_candidato = c.id
-    GROUP BY c.TP_FAIXA_ETARIA
-    ORDER BY c.TP_FAIXA_ETARIA;
-"""
-
-query_proporcao_genero = """
+# Query 1: Porcentagem de participantes por sexo e estado
+query_porcentagem_genero_estado = """
     SELECT 
         e.SG_UF_PROVA,
         c.TP_SEXO,
         COUNT(*) AS total_candidatos,
-        (COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (PARTITION BY e.SG_UF_PROVA)) AS percentual
+        ROUND((COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (PARTITION BY e.SG_UF_PROVA)), 2) AS percentual
     FROM fato_notas f
     JOIN dim_candidato c ON f.id_candidato = c.id
     JOIN dim_estado e ON f.id_estado = e.id
@@ -55,6 +45,7 @@ query_proporcao_genero = """
     ORDER BY e.SG_UF_PROVA, c.TP_SEXO;
 """
 
+# Query 2: Média por disciplina por estado
 query_media_por_disciplina = """
     SELECT 
         e.SG_UF_PROVA,
@@ -69,6 +60,28 @@ query_media_por_disciplina = """
     ORDER BY e.SG_UF_PROVA;
 """
 
+# Query 2.1: Estado com maior e menor média geral
+query_estado_extremos = """
+    WITH media_estados AS (
+        SELECT 
+            e.SG_UF_PROVA,
+            AVG((f.NU_NOTA_MT + f.NU_NOTA_CN + f.NU_NOTA_LC + f.NU_NOTA_CH + f.NU_NOTA_REDACAO) / 5) AS media_geral
+        FROM fato_notas f
+        JOIN dim_estado e ON f.id_estado = e.id
+        GROUP BY e.SG_UF_PROVA
+    )
+    SELECT SG_UF_PROVA, media_geral
+    FROM media_estados
+    WHERE media_geral = (SELECT MAX(media_geral) FROM media_estados)
+       OR media_geral = (SELECT MIN(media_geral) FROM media_estados)
+    ORDER BY media_geral;
+"""
+
+# Query 3: Total de candidatos contabilizados
+query_total_candidatos = """
+    SELECT COUNT(DISTINCT id_candidato) AS total_candidatos FROM fato_notas;
+"""
+
 # Definição da DAG
 dag = DAG(
     'etl_enem_2023_p5_consultando_dw',
@@ -78,17 +91,10 @@ dag = DAG(
     catchup=False,
 )
 
-consulta_faixa_etaria = PythonOperator(
-    task_id='consulta_faixa_etaria',
+consulta_porcentagem_genero_estado = PythonOperator(
+    task_id='consulta_porcentagem_genero_estado',
     python_callable=consultar_dw_mysql,
-    op_kwargs={'sql_query': query_faixa_etaria, 'task_name': 'Faixa Etária'},
-    dag=dag
-)
-
-consulta_proporcao_genero = PythonOperator(
-    task_id='consulta_proporcao_genero',
-    python_callable=consultar_dw_mysql,
-    op_kwargs={'sql_query': query_proporcao_genero, 'task_name': 'Proporção de Gênero'},
+    op_kwargs={'sql_query': query_porcentagem_genero_estado, 'task_name': 'Porcentagem de Gênero por Estado'},
     dag=dag
 )
 
@@ -99,4 +105,19 @@ consulta_media_por_disciplina = PythonOperator(
     dag=dag
 )
 
-[consulta_faixa_etaria, consulta_proporcao_genero, consulta_media_por_disciplina]
+consulta_estado_extremos = PythonOperator(
+    task_id='consulta_estado_extremos',
+    python_callable=consultar_dw_mysql,
+    op_kwargs={'sql_query': query_estado_extremos, 'task_name': 'Estado com Maior e Menor Média Geral'},
+    dag=dag
+)
+
+consulta_total_candidatos = PythonOperator(
+    task_id='consulta_total_candidatos',
+    python_callable=consultar_dw_mysql,
+    op_kwargs={'sql_query': query_total_candidatos, 'task_name': 'Total de Candidatos'},
+    dag=dag
+)
+
+[consulta_porcentagem_genero_estado, consulta_media_por_disciplina, consulta_estado_extremos, consulta_total_candidatos]
+
