@@ -9,26 +9,26 @@ import time
 # Definição dos argumentos da DAG
 default_args = {
     "owner": "airflow",
-    "start_date": datetime(2024, 2, 4),
+    'start_date': datetime.now(),
     "catchup": False
 }
 
 # Definição do tamanho do chunk e limite de processamento
-CHUNK_SIZE = int(Variable.get("CHUNK_SIZE"))  # Cada chunk contém 5000 registros
-CHUNK_PROCESS_QTD = int(Variable.get("CHUNK_PROCESS_QTD"))  # Quantidade máxima de chunks a serem processados
+CHUNK_TAMANHO = int(Variable.get("CHUNK_SIZE"))
+CHUNK_QTD = int(Variable.get("CHUNK_PROCESS_QTD"))
 
 # Caminhos dos arquivos
-INPUT_FILE = "/opt/airflow/data/enem_2023/DADOS/MICRODADOS_ENEM_2023.csv"
-OUTPUT_FILE = "/opt/airflow/staging/enem_2023_cleaned.csv"
+ARQUIVO_ENTRADA = "/opt/airflow/data/enem_2023/DADOS/MICRODADOS_ENEM_2023.csv"
+ARQUIVO_SAIDA = "/opt/airflow/staging/enem_2023_cleaned.csv"
 
 def verificar_arquivo():
     """Verifica se o arquivo de entrada existe antes de iniciar o processamento."""
-    if not os.path.exists(INPUT_FILE):
-        print(f"❌ Erro: O arquivo {INPUT_FILE} não foi encontrado!\nCertifique-se de que a DAG de download e descompactação rodou corretamente.")
+    if not os.path.exists(ARQUIVO_ENTRADA):
+        print(f"❌ Erro: O arquivo {ARQUIVO_ENTRADA} não foi encontrado!\nCertifique-se de que a DAG de download e descompactação rodou corretamente.")
         time.sleep(3)  
-        raise FileNotFoundError(f"❌ Erro: O arquivo {INPUT_FILE} não foi encontrado!\nCertifique-se de que a DAG de download e descompactação rodou corretamente.")
+        raise FileNotFoundError(f"❌ Erro: O arquivo {ARQUIVO_ENTRADA} não foi encontrado!\nCertifique-se de que a DAG de download e descompactação rodou corretamente.")
 
-    print(f"✅ Arquivo encontrado: {INPUT_FILE}")
+    print(f"✅ Arquivo encontrado: {ARQUIVO_ENTRADA}")
 
 def carregar_pre_processar_dados():
     """Processa e limpa os dados do ENEM 2023, salvando em um arquivo formatado."""
@@ -39,21 +39,21 @@ def carregar_pre_processar_dados():
     os.makedirs("/opt/airflow/staging", exist_ok=True)
 
     chunk_idx = 0  # Contador de chunks processados
-    total_chunks = sum(1 for _ in pd.read_csv(INPUT_FILE, delimiter=";", encoding="latin-1", chunksize=CHUNK_SIZE))  # Conta chunks totais
+    total_chunks = sum(1 for _ in pd.read_csv(ARQUIVO_ENTRADA, delimiter=";", encoding="latin-1", chunksize=CHUNK_TAMANHO))  # Conta chunks totais
 
     # Lê o arquivo em chunks e processa um número limitado de chunks
-    with pd.read_csv(INPUT_FILE, delimiter=';', encoding="latin-1", chunksize=CHUNK_SIZE) as reader:
+    with pd.read_csv(ARQUIVO_ENTRADA, delimiter=';', encoding="latin-1", chunksize=CHUNK_TAMANHO) as reader:
         for i, chunk in enumerate(reader):
             
             print(f"📂 Processamento TOTAL da Base => Chunk {i + 1}...")
 
             chunk_idx += 1
-            progress = (chunk_idx / total_chunks) * 100
+            progresso = (chunk_idx / total_chunks) * 100
             
-            print(f"✅ Processamento TOTAL da Base => Chunk {chunk_idx}/{total_chunks} ({progress:.2f}%) - {len(chunk)} registros...")      
+            print(f"✅ Processamento TOTAL da Base => Chunk {chunk_idx}/{total_chunks} ({progresso:.2f}%) - {len(chunk)} registros...")      
                   
-            if chunk_idx > CHUNK_PROCESS_QTD:
-                print(f"🔹 Limite de {CHUNK_PROCESS_QTD} chunks atingido. Parando processamento.")
+            if chunk_idx > CHUNK_QTD:
+                print(f"🔹 Limite de {CHUNK_QTD} chunks atingido. Parando processamento.")
                 break  # Para o loop após atingir o limite
 
             # 🔹 Seleciona apenas as colunas necessárias
@@ -88,7 +88,7 @@ def carregar_pre_processar_dados():
 
             # 🔹 Salva o chunk processado no arquivo de saída
             chunk.to_csv(
-                OUTPUT_FILE, 
+                ARQUIVO_SAIDA, 
                 index=False, 
                 mode='w' if chunk_idx == 1 else 'a',  # 'w' para o primeiro chunk, 'a' para os seguintes
                 header=True if chunk_idx == 1 else False  # Apenas o primeiro chunk deve ter cabeçalho

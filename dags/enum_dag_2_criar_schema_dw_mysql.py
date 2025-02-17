@@ -7,31 +7,29 @@ import MySQLdb
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'start_date': datetime(2024, 1, 29),
+    'start_date': datetime.now(),
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
 }
 
-conn = MySQLdb.connect(
-    host="mysql",
-    port=3306,
-    user="airflow",
-    passwd="airflow"
-)
-
 def create_schemas():
     """Cria os bancos de dados e suas tabelas no MySQL, removendo dados antigos antes da recriação."""
     print("🔹 Conectando ao MySQL...")
-
+    conn = MySQLdb.connect(
+        host="mysql",
+        port=3306,
+        user="airflow",
+        passwd="airflow"
+    )
     cursor = conn.cursor()
 
     print("🚀 Criando bancos de dados...")
     cursor.execute("CREATE DATABASE IF NOT EXISTS enem_producao;")
     cursor.execute("CREATE DATABASE IF NOT EXISTS enem_dw;")
 
-    # Seleciona o banco de staging e recria a tabela
+    # Seleciona o banco de staging e recria a tabela de produção
     cursor.execute("USE enem_producao;")
-    
+
     print("⚡ Resetando a tabela `staging_enem`...")
     cursor.execute("DROP TABLE IF EXISTS staging_enem;")
     cursor.execute("""
@@ -55,11 +53,9 @@ def create_schemas():
 
     # **Desativando restrições de chave estrangeira temporariamente**
     cursor.execute("SET FOREIGN_KEY_CHECKS=0;")
-
-    cursor.execute("DROP TABLE IF EXISTS fato_notas;")  # Apaga primeiro a tabela de fatos
-    cursor.execute("DROP TABLE IF EXISTS fato_inscritos;")
-    cursor.execute("DROP TABLE IF EXISTS dim_candidato;")  
-    cursor.execute("DROP TABLE IF EXISTS dim_estado;")  
+    cursor.execute("DROP TABLE IF EXISTS fato_notas;")
+    cursor.execute("DROP TABLE IF EXISTS dim_candidato;")
+    cursor.execute("DROP TABLE IF EXISTS dim_estado;")
 
     # **Reativando restrições de chave estrangeira**
     cursor.execute("SET FOREIGN_KEY_CHECKS=1;")
@@ -67,6 +63,7 @@ def create_schemas():
     # Criando dimensões e tabelas fato
     print("📌 Criando tabelas do DW...")
 
+    # dim_estado
     cursor.execute("""
         CREATE TABLE dim_estado (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -74,14 +71,16 @@ def create_schemas():
         );
     """)
 
+    # dim_candidato
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS dim_candidato (
+        CREATE TABLE dim_candidato (
             id INT AUTO_INCREMENT PRIMARY KEY,
             TP_FAIXA_ETARIA INT,
             TP_SEXO CHAR(1)
         );
     """)
 
+    # fato_notas
     cursor.execute("""
         CREATE TABLE fato_notas (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -94,16 +93,6 @@ def create_schemas():
             NU_NOTA_REDACAO FLOAT,
             FOREIGN KEY (id_estado) REFERENCES dim_estado(id),
             FOREIGN KEY (id_candidato) REFERENCES dim_candidato(id)
-        );
-    """)
-
-    cursor.execute("""
-        CREATE TABLE fato_inscritos (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            id_estado INT,
-            TP_SEXO CHAR(1),
-            total INT,
-            FOREIGN KEY (id_estado) REFERENCES dim_estado(id)
         );
     """)
 
