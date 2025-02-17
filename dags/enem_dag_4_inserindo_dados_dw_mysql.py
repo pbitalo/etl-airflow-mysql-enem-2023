@@ -150,7 +150,7 @@ dag = DAG(
 )
 
 # Tarefa de transformação e carga
-transform_task = PythonOperator(
+tarefa_inserir_dados_mysql = PythonOperator(
     task_id="inserir_dados_dw_mysql",
     python_callable=inserir_dados_dw_mysql,
     dag=dag

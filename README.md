@@ -111,8 +111,164 @@ graph TD;
 
 Cada DAG depende da execução bem-sucedida da anterior, garantindo que os dados sejam processados corretamente antes de avançar para a próxima etapa.
 
-## 📖 Documentação Completa
+## 🔥 **Visão Geral do Workflow**
 
-Para mais detalhes sobre a implementação e o código, acesse a documentação no Google Colab:
+O pipeline é composto por **6 DAGs** organizadas da seguinte forma:
 
-🔗 [Documentação no Colab](https://colab.research.google.com/drive/1jGYSlFpWaFJACmZloC6MrZduogTtaG3d?usp=sharing)
+| 🄍 DAG ID                                            | 🔥 Responsabilidade                              |
+| --------------------------------------------------- | ------------------------------------------------ |
+| `etl_enem_2023_p1_baixar_descompactar`              | Baixar e descompactar os microdados do ENEM 2023 |
+| `etl_enem_2023_p2_criar_schema_dw_mysql`            | Criar bancos e tabelas no MySQL                  |
+| `etl_enem_2023_p3_pre_processamento_dados_dw_mysql` | Carregar e limpa os dados do ENEM                |
+| `etl_enem_2023_p4_inserindo_dados_dw_mysql`         | Inserir dados no Data Warehouse                  |
+| `etl_enem_2023_p5_consultando_dw`                   | Consultar os dados e gerar insights / testar     |
+| `workflow_dw_enem_2023`                             | DAG que representa o workflow completo.          |
+
+---
+
+## 🛠️ **Detalhamento das DAGs**
+
+### **📈 1. DAG: `etl_enem_2023_p1_baixar_descompactar`**
+
+**Objetivo:** Baixa os microdados do ENEM e descompacta o arquivo ZIP.
+
+#### **🗒️ Funções**
+
+```python
+def salvar_arquivo(response, caminho_arquivo):
+    """
+    Salva o arquivo baixado no diretório especificado.
+    """
+
+def baixar_enem_2023():
+    """
+    Faz o download do arquivo ZIP com os dados do ENEM 2023.
+    """
+
+def descompacta_bd_enem():
+    """
+    Extrai os arquivos do ZIP baixado.
+    """
+```
+
+### 🔹 **Ordem de execução**
+
+baixar_enem_2023 → Baixa os dados
+
+descompacta_bd_enem → Descompacta o arquivo
+
+## 📈 **2. DAG: etl_enem_2023_p2_criar_schema_dw_mysql**
+
+Objetivo: Cria os bancos e tabelas do Data Warehouse.
+
+### 🗒️ **Função**
+
+```python
+def criar_schemas():
+  """
+  Cria bancos e tabelas no MySQL, resetando os dados a cada execução.
+  """
+```
+
+### 🔹 **Criação das tabelas:**
+
+staging_enem (dados brutos)
+
+dim_estado (dimensão de estados)
+
+dim_candidato (dimensão dos candidatos)
+
+fato_notas (tabela de fatos com as notas)
+
+### 🔹 **Ordem de execução**
+
+tarefa_criar_bd_mysql → Criação do banco de dados e tabelas
+
+## 📈 **3. DAG: etl_enem_2023_p3_pre_processamento_dados_dw_mysql**
+
+Objetivo: Processa e limpa os dados do ENEM antes da inserção no DW.
+
+### 🗒️ **Funções**
+
+```python
+def verificar_arquivo():
+   """
+   Verifica se o arquivo de entrada existe antes de iniciar o processamento.
+   """
+
+def carregar_pre_processar_dados():
+   """
+   Processa os dados, removendo colunas desnecessárias e tratando valores nulos.
+   """
+```
+
+### 🔹 **Ordem de execução**
+
+tarefa_verificar_arquivo_existe → Confere se o CSV existe
+
+tarefa_pre_processamento → Processa e limpa os dados
+
+## 📈 **4. DAG: etl_enem_2023_p4_inserindo_dados_dw_mysql**
+
+Objetivo: Insere os dados processados no Data Warehouse.
+
+### 🗒️ **Funções**
+
+```python
+def inserir_dim_estado(cursor, chunk):
+  """
+  Insere estados únicos na tabela dim_estado.
+  """
+
+def inserir_dim_candidato(cursor, chunk):
+  """
+  Insere candidatos únicos na tabela dim_candidato.
+  """
+
+def inserir_fato_notas(cursor, chunk):
+  """
+  Insere registros na tabela fato_notas.
+  """
+
+def inserir_dados_dw_mysql():
+  """
+  Lê o arquivo pre-processado e submete ao processo de persistência.
+  """
+
+```
+
+### 🔹 **Ordem de execução**
+
+tarefa_inserir_dados_mysql → Insere estados
+
+## 📈 **5. DAG: etl_enem_2023_p5_consultando_dw**
+
+Objetivo: Executa consultas no MySQL para testar o DW.
+
+## 🔥 **Para rodar o projeto ?**
+
+Levando com conta que o docker está instalado/configurado, siga os passos:
+
+1. **`Baixe o projeto`**
+
+   ```python
+   git clone https://github.com/pbitalo/etl-airflow-mysql-enem-2023.git
+   ```
+
+2. **`Execute o docker-compose`**
+
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **`acesse no navegador localhost:8080 e faça o login com airflow/airflow`**
+
+4. **`Crie as seguintes variáveis de ambiente indo em Admin->Variables: `**
+
+| Nome da Variável    | 🔥 Valor                                                         |
+| ------------------- | ---------------------------------------------------------------- |
+| `CHUNK_PROCESS_QTD` | 5                                                                |
+| `CHUNK_SIZE`        | 5000                                                             |
+| `url_enem_2023`     | https://download.inep.gov.br/microdados/microdados_enem_2023.zip |
+
+4. **`Execute a DAG workflow-dw-enem-2023`**
