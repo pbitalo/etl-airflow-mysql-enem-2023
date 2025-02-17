@@ -1,24 +1,9 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from datetime import datetime, timedelta
-import MySQLdb
+from dag_config import default_args
+from dag_config import get_conexao_mysql
 
-# Configuração da DAG
-default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'start_date': datetime.now(),
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
-}
-
-conn = MySQLdb.connect(
-    host="mysql",
-    port=3306,
-    user="airflow",
-    passwd="airflow",
-    db="enem_dw"
-)
+conn = get_conexao_mysql(db="enem_dw")
 
 def consultar_dw_mysql(sql_query, task_name):
     print(f"🔹 Conectando ao MySQL para {task_name}...")

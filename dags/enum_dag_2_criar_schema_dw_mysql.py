@@ -1,26 +1,14 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from datetime import datetime, timedelta
-import MySQLdb
+from dag_config import default_args
+from dag_config import get_conexao_mysql
 
-# Configuração da DAG
-default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'start_date': datetime.now(),
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
-}
+conn = get_conexao_mysql()
 
-def criar_schemas():
+def create_schemas():
     """Cria os bancos de dados e suas tabelas no MySQL, removendo dados antigos antes da recriação."""
     print("🔹 Conectando ao MySQL...")
-    conn = MySQLdb.connect(
-        host="mysql",
-        port=3306,
-        user="airflow",
-        passwd="airflow"
-    )
+
     cursor = conn.cursor()
 
     print("🚀 Criando bancos de dados...")
@@ -112,7 +100,7 @@ dag = DAG(
 
 # Criando a tarefa para criar os bancos e tabelas
 tarefa_criar_bd_mysql = PythonOperator(
-    task_id='criar_schemas',
-    python_callable=criar_schemas,
+    task_id='create_schemas',
+    python_callable=create_schemas,
     dag=dag,
 )

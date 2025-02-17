@@ -1,20 +1,11 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from datetime import datetime, timedelta
 from airflow.models import Variable
+from dag_config import default_args
 import os
 import requests
 import zipfile
 import time
-
-# Configuração da DAG
-default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'start_date': datetime.now(),
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
-}
 
 def salvar_arquivo(response, caminho_arquivo):
     with open(caminho_arquivo, "wb") as file:

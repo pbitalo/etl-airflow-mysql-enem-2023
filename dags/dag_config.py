@@ -1,4 +1,19 @@
+from datetime import datetime, timedelta
 import MySQLdb
+
+default_args = {
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'start_date': datetime.now(),
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
+}
+
+default_args_default = {
+    "owner": "airflow",
+    'start_date': datetime.now(),
+    "catchup": False
+}
 
 def get_conexao_mysql(**kwargs):
     """

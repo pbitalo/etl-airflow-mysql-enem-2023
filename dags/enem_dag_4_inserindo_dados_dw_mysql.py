@@ -1,30 +1,18 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from datetime import datetime
 from airflow.models import Variable
+from dag_config import default_args
+from dag_config import get_conexao_mysql
 import pandas as pd
-import MySQLdb
 
 # Caminho para o arquivo pré-processado
 caminho_bd_tratado = "/opt/airflow/staging/enem_2023_cleaned.csv"
 
 # Configuração da DAG
-default_args = {
-    "owner": "airflow",
-    'start_date': datetime.now(),
-    "catchup": False,
-    "retries": 2,
-}
+default_args_default = default_args.copy()
+default_args_default['retries'] = 2
 
-# Configs para conexão com MySQL (banco enem_dw)
-conn = MySQLdb.connect(
-    host="mysql",
-    port=3306,
-    user="airflow",
-    passwd="airflow",
-    db="enem_dw",
-    autocommit=True
-)
+conn = get_conexao_mysql(db="enem_dw",autocommit=True)
 
 # Tamanho dos chunk's para processamento
 CHUNK_TAMANHO = int(Variable.get("CHUNK_SIZE"))
@@ -145,13 +133,14 @@ def inserir_dados_dw_mysql():
 # Criação da DAG
 dag = DAG(
     "etl_enem_2023_p4_inserindo_dados_dw_mysql",
-    default_args=default_args,
+    default_args=default_args_default,
     schedule_interval="@once"
 )
 
 # Tarefa de transformação e carga
-tarefa_inserir_dados_mysql = PythonOperator(
+transform_task = PythonOperator(
     task_id="inserir_dados_dw_mysql",
     python_callable=inserir_dados_dw_mysql,
     dag=dag
 )
+

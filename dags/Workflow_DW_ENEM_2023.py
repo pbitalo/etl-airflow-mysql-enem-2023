@@ -1,15 +1,6 @@
 from airflow import DAG
+from dag_config import default_args
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
-from datetime import datetime, timedelta
-
-# 📌 Configuração padrão
-default_args = {
-    "owner": "airflow",
-    "depends_on_past": False,
-    "start_date": datetime(2024, 2, 4),
-    "retries": 1,
-    "retry_delay": timedelta(minutes=5),
-}
 
 # 📌 Criando a DAG Master
 dag = DAG(

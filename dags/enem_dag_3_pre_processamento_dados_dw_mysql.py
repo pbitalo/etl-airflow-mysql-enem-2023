@@ -1,17 +1,10 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from datetime import datetime
 from airflow.models import Variable
+from dag_config import default_args_default
 import pandas as pd
 import os
 import time
-
-# Definição dos argumentos da DAG
-default_args = {
-    "owner": "airflow",
-    'start_date': datetime.now(),
-    "catchup": False
-}
 
 # Definição do tamanho do chunk e limite de processamento
 CHUNK_TAMANHO = int(Variable.get("CHUNK_SIZE"))
@@ -32,11 +25,6 @@ def verificar_arquivo():
 
 def carregar_pre_processar_dados():
     """Processa e limpa os dados do ENEM 2023, salvando em um arquivo formatado."""
-
-    # 🔹 A verificação do arquivo já foi feita na DAG, então aqui só processamos os dados
-
-    # Garante que o diretório de saída existe
-    os.makedirs("/opt/airflow/staging", exist_ok=True)
 
     chunk_idx = 0  # Contador de chunks processados
     total_chunks = sum(1 for _ in pd.read_csv(ARQUIVO_ENTRADA, delimiter=";", encoding="latin-1", chunksize=CHUNK_TAMANHO))  # Conta chunks totais
@@ -101,7 +89,7 @@ def carregar_pre_processar_dados():
 # Criando a DAG
 dag = DAG(
     "etl_enem_2023_p3_pre_processamento_dados_dw_mysql",
-    default_args=default_args,
+    default_args=default_args_default,
     schedule_interval="@once"
 )
 
