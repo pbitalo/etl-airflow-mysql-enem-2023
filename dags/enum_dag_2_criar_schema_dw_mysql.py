@@ -12,7 +12,7 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
-def create_schemas():
+def criar_schemas():
     """Cria os bancos de dados e suas tabelas no MySQL, removendo dados antigos antes da recriação."""
     print("🔹 Conectando ao MySQL...")
     conn = MySQLdb.connect(
@@ -112,7 +112,7 @@ dag = DAG(
 
 # Criando a tarefa para criar os bancos e tabelas
 tarefa_criar_bd_mysql = PythonOperator(
-    task_id='create_schemas',
-    python_callable=create_schemas,
+    task_id='criar_schemas',
+    python_callable=criar_schemas,
     dag=dag,
 )
