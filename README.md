@@ -276,3 +276,7 @@ Levando com conta que o docker está instalado/configurado, siga os passos:
 ## 🔥 Dashboard gerado via PowerBi
 
 ![Dashboard](https://github.com/pbitalo/etl-airflow-mysql-enem-2023/blob/main/dashboard/imagem_dashboard.png)
+
+## 🔥 Workflow
+
+![Dashboard](https://github.com/pbitalo/etl-airflow-mysql-enem-2023/blob/main/dashboard/workflow.png)
