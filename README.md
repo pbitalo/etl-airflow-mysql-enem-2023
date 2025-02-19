@@ -273,6 +273,24 @@ Levando com conta que o docker está instalado/configurado, siga os passos:
 
 4. **`Execute a DAG workflow-dw-enem-2023`**
 
+5. **`(Opcional) - É possível que exista a possibilidade de ter que dar permissão ao usuário no mysql, caso seja necessário, faz os passos a seguir:`**
+
+Se loga no mysql que está rodando via docker.
+
+```bash
+docker exec -it airflow-mysql-1 mysql -u root -p
+ou
+mysql -h 127.0.0.1 -P 3307 -u root -p
+```
+
+Então, roda os comandos:
+
+```sql
+CREATE USER 'airflow'@'%' IDENTIFIED BY 'airflow';
+GRANT ALL PRIVILEGES ON *.* TO 'airflow'@'%';
+FLUSH PRIVILEGES;
+```
+
 ## 🔥 Dashboard gerado via PowerBi
 
 ![Dashboard](https://github.com/pbitalo/etl-airflow-mysql-enem-2023/blob/main/dashboard/imagem_dashboard.png)
