@@ -1,88 +1,35 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from dag_config import default_args
-from dag_config import get_conexao_mysql
-
-conn = get_conexao_mysql()
+from dag_config import default_args, get_conexao_mysql
+from sql_queries import CREATE_DATABASES, DROP_TABLES, CREATE_TABLES
 
 def create_schemas():
     """Cria os bancos de dados e suas tabelas no MySQL, removendo dados antigos antes da recriação."""
     print("🔹 Conectando ao MySQL...")
-
+    conn = get_conexao_mysql()
     cursor = conn.cursor()
 
+    # Criar bancos de dados
     print("🚀 Criando bancos de dados...")
-    cursor.execute("CREATE DATABASE IF NOT EXISTS enem_producao;")
-    cursor.execute("CREATE DATABASE IF NOT EXISTS enem_dw;")
+    for query in CREATE_DATABASES:
+        cursor.execute(query)
 
-    # Seleciona o banco de staging e recria a tabela de produção
-    cursor.execute("USE enem_producao;")
+    # Resetar tabelas
+    for db, queries in DROP_TABLES.items():
+        cursor.execute(f"USE {db};")
+        print(f"⚡ Resetando tabelas no banco {db}...")
+        for query in queries:
+            cursor.execute(query)
 
-    print("⚡ Resetando a tabela `staging_enem`...")
-    cursor.execute("DROP TABLE IF EXISTS staging_enem;")
-    cursor.execute("""
-        CREATE TABLE staging_enem (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            TP_FAIXA_ETARIA INT,
-            SG_UF_PROVA VARCHAR(2),
-            NU_NOTA_MT FLOAT,
-            NU_NOTA_CN FLOAT,
-            NU_NOTA_LC FLOAT,
-            NU_NOTA_CH FLOAT,
-            NU_NOTA_REDACAO FLOAT,
-            TP_SEXO CHAR(1)
-        );
-    """)
-    print("✅ Tabela `staging_enem` recriada!")
-
-    # Seleciona o banco do Data Warehouse e recria as tabelas
-    cursor.execute("USE enem_dw;")
-    print("⚡ Resetando tabelas no Data Warehouse...")
-
-    # **Desativando restrições de chave estrangeira temporariamente**
-    cursor.execute("SET FOREIGN_KEY_CHECKS=0;")
-    cursor.execute("DROP TABLE IF EXISTS fato_notas;")
-    cursor.execute("DROP TABLE IF EXISTS dim_candidato;")
-    cursor.execute("DROP TABLE IF EXISTS dim_estado;")
-
-    # **Reativando restrições de chave estrangeira**
-    cursor.execute("SET FOREIGN_KEY_CHECKS=1;")
-
-    # Criando dimensões e tabelas fato
-    print("📌 Criando tabelas do DW...")
-
-    # dim_estado
-    cursor.execute("""
-        CREATE TABLE dim_estado (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            SG_UF_PROVA VARCHAR(2) UNIQUE
-        );
-    """)
-
-    # dim_candidato
-    cursor.execute("""
-        CREATE TABLE dim_candidato (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            TP_FAIXA_ETARIA INT,
-            TP_SEXO CHAR(1)
-        );
-    """)
-
-    # fato_notas
-    cursor.execute("""
-        CREATE TABLE fato_notas (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            id_estado INT,
-            id_candidato INT,
-            NU_NOTA_MT FLOAT,
-            NU_NOTA_CN FLOAT,
-            NU_NOTA_LC FLOAT,
-            NU_NOTA_CH FLOAT,
-            NU_NOTA_REDACAO FLOAT,
-            FOREIGN KEY (id_estado) REFERENCES dim_estado(id),
-            FOREIGN KEY (id_candidato) REFERENCES dim_candidato(id)
-        );
-    """)
+    # Criar tabelas
+    for db, queries in CREATE_TABLES.items():
+        cursor.execute(f"USE {db};")
+        print(f"📌 Criando tabelas no banco {db}...")
+        if isinstance(queries, list):
+            for query in queries:
+                cursor.execute(query)
+        else:
+            cursor.execute(queries)
 
     conn.commit()
     cursor.close()
