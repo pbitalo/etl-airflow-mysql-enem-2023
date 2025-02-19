@@ -40,13 +40,13 @@ def create_schemas():
     print("⚡ Resetando tabelas no Data Warehouse...")
 
     # **Desativando restrições de chave estrangeira temporariamente**
-    cursor.execute("SET FOREIGN_KEY_CHECKS=0;")
+    # cursor.execute("SET FOREIGN_KEY_CHECKS=0;")
     cursor.execute("DROP TABLE IF EXISTS fato_notas;")
     cursor.execute("DROP TABLE IF EXISTS dim_candidato;")
     cursor.execute("DROP TABLE IF EXISTS dim_estado;")
 
     # **Reativando restrições de chave estrangeira**
-    cursor.execute("SET FOREIGN_KEY_CHECKS=1;")
+    # cursor.execute("SET FOREIGN_KEY_CHECKS=1;")
 
     # Criando dimensões e tabelas fato
     print("📌 Criando tabelas do DW...")
