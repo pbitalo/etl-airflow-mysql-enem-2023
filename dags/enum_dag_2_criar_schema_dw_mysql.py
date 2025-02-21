@@ -1,7 +1,7 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from dag_config import default_args, get_conexao_mysql
-from sql_queries import CREATE_DATABASES, DROP_TABLES, CREATE_TABLES
+from mysql_queries import CREATE_DATABASES, DROP_TABLES, CREATE_TABLES
 
 def create_schemas():
     """Cria os bancos de dados e suas tabelas no MySQL, removendo dados antigos antes da recriação."""
@@ -36,7 +36,6 @@ def create_schemas():
     conn.close()
     print("✅ Bancos de dados e tabelas recriados com sucesso!")
 
-# Criando a DAG
 dag = DAG(
     'etl_enem_2023_p2_criar_schema_dw_mysql',
     default_args=default_args,
@@ -45,7 +44,6 @@ dag = DAG(
     catchup=False,
 )
 
-# Criando a tarefa para criar os bancos e tabelas
 tarefa_criar_bd_mysql = PythonOperator(
     task_id='create_schemas',
     python_callable=create_schemas,

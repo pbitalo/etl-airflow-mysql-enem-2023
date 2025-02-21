@@ -2,15 +2,13 @@ from airflow import DAG
 from dag_config import default_args
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
-# 📌 Criando a DAG Master
 dag = DAG(
-    "workflow_dw_enem_2023",  # Nome da DAG principal
+    "workflow_dw_enem_2023",
     default_args=default_args,
-    schedule_interval="@once",  # Pode ser ajustado conforme necessário
+    schedule_interval="@once",
     catchup=False,
 )
 
-# 📌 Encapsula a DAG 1
 fluxo_1_baixar_descompactar_bd = TriggerDagRunOperator(
     task_id="etl_enem_2023_p1_baixar_descompactar",
     trigger_dag_id="etl_enem_2023_p1_baixar_descompactar",  
@@ -19,7 +17,6 @@ fluxo_1_baixar_descompactar_bd = TriggerDagRunOperator(
     dag=dag,
 )
 
-# 📌 Encapsula a DAG 2
 fluxo_2_criar_schema_dw_mysql = TriggerDagRunOperator(
     task_id="etl_enem_2023_p2_criar_schema_dw_mysql",
     trigger_dag_id="etl_enem_2023_p2_criar_schema_dw_mysql",  
@@ -28,7 +25,6 @@ fluxo_2_criar_schema_dw_mysql = TriggerDagRunOperator(
     dag=dag,
 )
 
-# 📌 Encapsula a DAG 3
 fluxo_3_pre_processamento_dados_dw_mysql = TriggerDagRunOperator(
     task_id="etl_enem_2023_p3_pre_processamento_dados_dw_mysql",
     trigger_dag_id="etl_enem_2023_p3_pre_processamento_dados_dw_mysql",  
@@ -37,7 +33,6 @@ fluxo_3_pre_processamento_dados_dw_mysql = TriggerDagRunOperator(
     dag=dag,
 )
 
-# 📌 Encapsula a DAG 4
 fluxo_4_inserindo_dados_dw_mysql = TriggerDagRunOperator(
     task_id="etl_enem_2023_p4_inserindo_dados_dw_mysql",
     trigger_dag_id="etl_enem_2023_p4_inserindo_dados_dw_mysql",  
@@ -46,7 +41,6 @@ fluxo_4_inserindo_dados_dw_mysql = TriggerDagRunOperator(
     dag=dag,
 )
 
-# 📌 Encapsula a DAG 5
 fluxo_5_consultando_dw = TriggerDagRunOperator(
     task_id="etl_enem_2023_p5_consultando_dw",
     trigger_dag_id="etl_enem_2023_p5_consultando_dw",  
@@ -55,5 +49,5 @@ fluxo_5_consultando_dw = TriggerDagRunOperator(
     dag=dag,
 )
 
-# 📌 A dag1 e dag2 rodaram em paralelo, porém as demais são executadas após o sucesso da anterior.
+# Ordem de executação do workflow
 [fluxo_1_baixar_descompactar_bd , fluxo_2_criar_schema_dw_mysql] >> fluxo_3_pre_processamento_dados_dw_mysql >> fluxo_4_inserindo_dados_dw_mysql >> fluxo_5_consultando_dw

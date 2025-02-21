@@ -6,11 +6,9 @@ import pandas as pd
 import os
 import time
 
-# Definição do tamanho do chunk e limite de processamento
 CHUNK_TAMANHO = int(Variable.get("CHUNK_SIZE"))
 CHUNK_QTD = int(Variable.get("CHUNK_PROCESS_QTD"))
 
-# Caminhos dos arquivos
 ARQUIVO_ENTRADA = "/opt/airflow/data/enem_2023/DADOS/MICRODADOS_ENEM_2023.csv"
 ARQUIVO_SAIDA = "/opt/airflow/staging/enem_2023_cleaned.csv"
 
@@ -42,7 +40,7 @@ def carregar_pre_processar_dados():
                   
             if chunk_idx > CHUNK_QTD:
                 print(f"🔹 Limite de {CHUNK_QTD} chunks atingido. Parando processamento.")
-                break  # Para o loop após atingir o limite
+                break
 
             # 🔹 Seleciona apenas as colunas necessárias
             cols = [
@@ -78,7 +76,7 @@ def carregar_pre_processar_dados():
             chunk.to_csv(
                 ARQUIVO_SAIDA, 
                 index=False, 
-                mode='w' if chunk_idx == 1 else 'a',  # 'w' para o primeiro chunk, 'a' para os seguintes
+                mode='w' if chunk_idx == 1 else 'a',
                 header=True if chunk_idx == 1 else False  # Apenas o primeiro chunk deve ter cabeçalho
             )
             
@@ -107,5 +105,6 @@ tarefa_pre_processamento = PythonOperator(
     dag=dag
 )
 
+# Ordem de execução
 tarefa_verificar_arquivo_existe >> tarefa_pre_processamento
 

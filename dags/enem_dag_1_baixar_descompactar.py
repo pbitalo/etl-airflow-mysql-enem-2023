@@ -8,12 +8,16 @@ import zipfile
 import time
 
 def salvar_arquivo(response, caminho_arquivo):
+    """Salva o arquivo no caminho informado"""
+    
     with open(caminho_arquivo, "wb") as file:
         for chunk in response.iter_content(chunk_size=1024 * 1024):
             file.write(chunk)
     print(f"📥 Download concluído e salvo em: {caminho_arquivo}")
 
 def baixar_enem_2023():
+    """Faz o download da base de dados do ENEM 2023"""
+    
     url = Variable.get("url_enem_2023")
     caminho_destino = "/opt/airflow/data/enem_2023.zip"
     os.makedirs("/opt/airflow/data/", exist_ok=True)
@@ -72,4 +76,5 @@ tarefa_descompactar = PythonOperator(
     dag=dag,
 )
 
+# Ordem de execução
 tarefa_baixar_bd >> tarefa_descompactar

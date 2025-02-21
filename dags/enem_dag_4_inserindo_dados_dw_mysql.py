@@ -15,7 +15,6 @@ default_args_default['retries'] = 2
 
 conn = get_conexao_mysql(db="enem_dw", autocommit=True)
 
-# Tamanho dos chunks para processamento
 CHUNK_TAMANHO = int(Variable.get("CHUNK_SIZE"))
 CHUNK_QTD = int(Variable.get("CHUNK_PROCESS_QTD"))
 
@@ -96,15 +95,13 @@ def inserir_dados_dw_mysql():
     conn.close()
     print("🚀 Transformação e carga concluídas!")
 
-# Criando a DAG
 dag = DAG(
     "etl_enem_2023_p4_inserindo_dados_dw_mysql",
     default_args=default_args_default,
     schedule_interval="@once"
 )
 
-# Criando a tarefa de transformação e carga
-transform_task = PythonOperator(
+tarefa_popuplar_dw = PythonOperator(
     task_id="inserir_dados_dw_mysql",
     python_callable=inserir_dados_dw_mysql,
     dag=dag

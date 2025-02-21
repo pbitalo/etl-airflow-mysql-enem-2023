@@ -1,7 +1,7 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from dag_config import default_args, get_conexao_mysql
-from sql_queries import (QUERY_PORCENTAGEM_GENERO_ESTADO, QUERY_MEDIA_DISCIPLINA_SEXO_ESTADO, 
+from mysql_queries import (QUERY_PORCENTAGEM_GENERO_ESTADO, QUERY_MEDIA_DISCIPLINA_SEXO_ESTADO, 
                          QUERY_MEDIA_GERAL_SEXO_ESTADO, QUERY_ESTADO_EXTREMOS, 
                          QUERY_TOTAL_CANDIDATOS, QUERY_MEDIA_GERAL)
 
@@ -18,7 +18,6 @@ def consultar_dw_mysql(sql_query, task_name):
     conn.close()
     print(f"✅ {task_name} concluído!")
 
-# Definição da DAG
 dag = DAG(
     'etl_enem_2023_p5_consultando_dw',
     default_args=default_args,
@@ -27,7 +26,6 @@ dag = DAG(
     catchup=False,
 )
 
-# Criando as tarefas da DAG
 consulta_porcentagem_genero_estado = PythonOperator(
     task_id='consulta_porcentagem_genero_estado',
     python_callable=consultar_dw_mysql,
@@ -70,7 +68,7 @@ consulta_media_geral = PythonOperator(
     dag=dag
 )
 
-#Executando as consultas em paralelo.
+# Ordem de execução
 [consulta_porcentagem_genero_estado, consulta_media_disciplina_sexo_estado, 
  consulta_media_geral_sexo_estado, consulta_estado_extremos, 
  consulta_total_candidatos, consulta_media_geral]

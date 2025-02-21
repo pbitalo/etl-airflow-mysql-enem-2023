@@ -1,3 +1,6 @@
+# Este arquivo agrupa todas as instruções SQL's utilizadas no processo de ETL, incluindo criação e exclusão de banco de dados e tabelas (DDL) 
+# e instruções de inserção em tabelas de dimensão e fato (DML)
+
 CREATE_DATABASES = [
     "CREATE DATABASE IF NOT EXISTS enem_producao;",
     "CREATE DATABASE IF NOT EXISTS enem_dw;"

@@ -1,3 +1,6 @@
+## Centraliza objetos utilizados na criação das dags e função para criar dinamicamente conexão com 
+## banco de dados MySQL.
+
 from datetime import datetime, timedelta
 import MySQLdb
 
