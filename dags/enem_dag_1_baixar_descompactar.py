@@ -1,28 +1,23 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from datetime import datetime, timedelta
 from airflow.models import Variable
+from dag_config import default_args
 import os
 import requests
 import zipfile
 import time
 
-# Configuração da DAG
-default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'start_date': datetime(2024, 1, 29),
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
-}
-
 def salvar_arquivo(response, caminho_arquivo):
+    """Salva o arquivo no caminho informado"""
+    
     with open(caminho_arquivo, "wb") as file:
         for chunk in response.iter_content(chunk_size=1024 * 1024):
             file.write(chunk)
     print(f"📥 Download concluído e salvo em: {caminho_arquivo}")
 
 def baixar_enem_2023():
+    """Faz o download da base de dados do ENEM 2023"""
+    
     url = Variable.get("url_enem_2023")
     caminho_destino = "/opt/airflow/data/enem_2023.zip"
     os.makedirs("/opt/airflow/data/", exist_ok=True)
@@ -81,4 +76,5 @@ tarefa_descompactar = PythonOperator(
     dag=dag,
 )
 
+# Ordem de execução
 tarefa_baixar_bd >> tarefa_descompactar
